@@ -1,21 +1,62 @@
 import React, { Component } from 'react';
 import Aux from '../../hoc/Aux';
 import Burger from '../../components/Burger/Burger'
+import BuildControls from '../../components/Burger/BuildControls/BuildControls'
+
+const INGREDIENT_PRICES = {
+    cheese:0.5,
+    salad:0.4,
+    bacon:1.3,
+    meat:0.7
+};
 
 class BurgerBuilder extends Component {
     state = {
         ingredients : {
-            cheese:2,
-            salad:1,
-            bacon:4,
-            meat:2
+            cheese:1,
+            salad:0,
+            bacon:0,
+            meat:0
+        },
+        totalPrice: 4
+    }
+
+    addIngredientHandler = (type) => {
+        const oldCount = this.state.ingredients[type];
+        const updateCount = oldCount + 1;
+        const updatedIngredient = { ...this.state.ingredients };
+        updatedIngredient[type] = updateCount;
+        const oldPrice = this.state.totalPrice;
+        const newPrice = oldPrice + INGREDIENT_PRICES[type];
+        this.setState({totalPrice: newPrice, ingredients: updatedIngredient});
+    }
+
+    removeIngredientHandler = (type) => {
+        const oldCount = this.state.ingredients[type];
+        if(oldCount <= 0) {
+            return;
         }
-    };
+        const updateCount = oldCount - 1;
+        const updatedIngredient = { ...this.state.ingredients };
+        updatedIngredient[type] = updateCount;
+        const oldPrice = this.state.totalPrice;
+        const newPrice = oldPrice - INGREDIENT_PRICES[type];
+        this.setState({totalPrice: newPrice, ingredients: updatedIngredient});
+    }
+
     render() {
+        let disabledIngredients = { ...this.state.ingredients };
+        for(let key in disabledIngredients) {
+            disabledIngredients[key] = disabledIngredients[key] <= 0;
+        }
         return (
             <Aux>
                 <Burger ingredients={ this.state.ingredients } />
-                <div>Burger Builder Controls</div>
+                <BuildControls 
+                ingredientAdded={this.addIngredientHandler}
+                ingredientRemoved={this.removeIngredientHandler}
+                disabled={disabledIngredients}
+                />
             </Aux>
         );
     }
